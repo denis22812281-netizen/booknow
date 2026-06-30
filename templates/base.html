@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BookNow — Онлайн запись{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<nav class="bg-white shadow-sm border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+            <a href="/" class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white font-bold text-sm">B</div>
+                <span class="text-xl font-bold text-gray-800">Book<span class="text-purple-600">Now</span></span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="/" class="text-gray-600 hover:text-purple-600 transition-colors text-sm font-medium">Главная</a>
+                <a href="/book/" class="text-gray-600 hover:text-purple-600 transition-colors text-sm font-medium">Записаться</a>
+                <a href="/book/" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    Записаться онлайн
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+{% if messages %}
+<div class="max-w-6xl mx-auto px-4 mt-4">
+    {% for message in messages %}
+    <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-2">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<footer class="bg-white border-t border-gray-100 mt-16">
+    <div class="max-w-6xl mx-auto px-4 py-8 text-center text-gray-500 text-sm">
+        <p>© 2024 BookNow — Система онлайн-записи | <a href="https://t.me/your_telegram" class="text-purple-600 hover:underline">Заказать такой же сайт</a></p>
+    </div>
+</footer>
+
+</body>
+</html>

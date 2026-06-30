@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% block title %}Записаться онлайн — BookNow{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12" x-data="{ step: 1, service: '{{ selected_service.id|default:'' }}', master: '', date: '', time: '' }">
+
+    <!-- Progress -->
+    <div class="flex items-center gap-2 mb-8">
+        <div class="flex items-center gap-2">
+            <div :class="step >= 1 ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-400'" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">1</div>
+            <span class="text-sm font-medium" :class="step >= 1 ? 'text-purple-600' : 'text-gray-400'">Услуга</span>
+        </div>
+        <div class="flex-1 h-0.5" :class="step >= 2 ? 'bg-purple-600' : 'bg-gray-200'"></div>
+        <div class="flex items-center gap-2">
+            <div :class="step >= 2 ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-400'" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">2</div>
+            <span class="text-sm font-medium" :class="step >= 2 ? 'text-purple-600' : 'text-gray-400'">Время</span>
+        </div>
+        <div class="flex-1 h-0.5" :class="step >= 3 ? 'bg-purple-600' : 'bg-gray-200'"></div>
+        <div class="flex items-center gap-2">
+            <div :class="step >= 3 ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-400'" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">3</div>
+            <span class="text-sm font-medium" :class="step >= 3 ? 'text-purple-600' : 'text-gray-400'">Контакты</span>
+        </div>
+    </div>
+
+    <form method="POST" action="/book/">
+        {% csrf_token %}
+
+        <!-- Step 1: Service + Master -->
+        <div x-show="step === 1">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Выберите услугу</h2>
+            <div class="grid grid-cols-1 gap-4 mb-6">
+                {% for s in services %}
+                <label class="cursor-pointer">
+                    <input type="radio" name="service" value="{{ s.id }}" x-model="service" class="sr-only" {% if selected_service and selected_service.id == s.id %}checked{% endif %}>
+                    <div :class="service == '{{ s.id }}' ? 'border-purple-600 bg-purple-50' : 'border-gray-200 bg-white'" class="border-2 rounded-xl p-4 flex items-center gap-4 transition-all">
+                        <span class="text-3xl">{{ s.icon }}</span>
+                        <div class="flex-1">
+                            <div class="font-semibold text-gray-800">{{ s.name }}</div>
+                            <div class="text-gray-500 text-sm">{{ s.duration }} мин · {{ s.price }}₽</div>
+                        </div>
+                        <div x-show="service == '{{ s.id }}'" class="text-purple-600">✓</div>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Мастер (необязательно)</h3>
+            <div class="grid grid-cols-2 gap-3 mb-8">
+                <label class="cursor-pointer">
+                    <input type="radio" name="master" value="" x-model="master" class="sr-only" checked>
+                    <div :class="master == '' ? 'border-purple-600 bg-purple-50' : 'border-gray-200 bg-white'" class="border-2 rounded-xl p-3 text-center transition-all">
+                        <div class="text-2xl">🎲</div>
+                        <div class="text-sm font-medium text-gray-700">Любой</div>
+                    </div>
+                </label>
+                {% for m in masters %}
+                <label class="cursor-pointer">
+                    <input type="radio" name="master" value="{{ m.id }}" x-model="master" class="sr-only">
+                    <div :class="master == '{{ m.id }}' ? 'border-purple-600 bg-purple-50' : 'border-gray-200 bg-white'" class="border-2 rounded-xl p-3 text-center transition-all">
+                        <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center text-white font-bold mx-auto mb-1">{{ m.name|first }}</div>
+                        <div class="text-sm font-medium text-gray-700">{{ m.name }}</div>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+
+            <button type="button" @click="step = 2" :disabled="!service" :class="service ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-300 cursor-not-allowed'" class="w-full text-white py-3 rounded-xl font-semibold transition-colors">
+                Далее →
+            </button>
+        </div>
+
+        <!-- Step 2: Date + Time -->
+        <div x-show="step === 2">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Выберите дату и время</h2>
+
+            <h3 class="font-medium text-gray-700 mb-3">Дата</h3>
+            <div class="grid grid-cols-4 gap-2 mb-6">
+                {% for d in available_dates %}
+                <label class="cursor-pointer">
+                    <input type="radio" name="date" value="{{ d|date:'Y-m-d' }}" x-model="date" class="sr-only">
+                    <div :class="date == '{{ d|date:'Y-m-d' }}' ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 border border-gray-200'" class="rounded-xl p-2 text-center transition-all text-sm">
+                        <div class="font-bold">{{ d|date:'d' }}</div>
+                        <div class="opacity-75 text-xs">{{ d|date:'M' }}</div>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+
+            <h3 class="font-medium text-gray-700 mb-3">Время</h3>
+            <div class="grid grid-cols-5 gap-2 mb-8">
+                {% for t in times %}
+                <label class="cursor-pointer">
+                    <input type="radio" name="time" value="{{ t }}" x-model="time" class="sr-only">
+                    <div :class="time == '{{ t }}' ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 border border-gray-200'" class="rounded-lg py-2 text-center text-sm font-medium transition-all">
+                        {{ t }}
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" @click="step = 1" class="flex-1 border-2 border-gray-200 text-gray-600 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                    ← Назад
+                </button>
+                <button type="button" @click="step = 3" :disabled="!date || !time" :class="date && time ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-300 cursor-not-allowed'" class="flex-1 text-white py-3 rounded-xl font-semibold transition-colors">
+                    Далее →
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Contacts -->
+        <div x-show="step === 3">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Ваши контакты</h2>
+
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ваше имя *</label>
+                    <input type="text" name="name" required placeholder="Иван Иванов" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Телефон *</label>
+                    <input type="tel" name="phone" required placeholder="+7 999 123-45-67" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Комментарий</label>
+                    <textarea name="comment" rows="3" placeholder="Пожелания к мастеру..." class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" @click="step = 2" class="flex-1 border-2 border-gray-200 text-gray-600 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                    ← Назад
+                </button>
+                <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold transition-colors">
+                    Записаться ✓
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
